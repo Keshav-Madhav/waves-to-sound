@@ -1,5 +1,5 @@
-import { resizeCanvas } from "../utils/resizeCanvas.js";
-import { Wave } from "./Wave.js";
+import { Wave } from './Wave.js';
+import { resizeCanvas } from '../utils/resizeCanvas.js';
 
 export class WaveManager {
   constructor(containerId) {
@@ -7,10 +7,13 @@ export class WaveManager {
     this.waves = [];
     this.container = document.getElementById(containerId);
 
+    // Initialize with 6 waves
     for (let i = 0; i < 6; i++) this.addWave();
 
+    // Set up event listeners
     window.addEventListener('load', () => this.resizeAllWaves());
     window.addEventListener('resize', () => this.resizeAllWaves());
+    document.addEventListener('removeWave', (e) => this.removeWave(e.detail.id));
   }
 
   addWave() {
@@ -37,11 +40,15 @@ export class WaveManager {
   }
 
   resizeAllWaves() {
-    const canvasArray = this.waves.map(w => w.canvas).filter(Boolean);
+    const canvasArray = this.waves.map(w => w.visualizer?.canvas).filter(Boolean);
     if (canvasArray.length > 0) {
       resizeCanvas({
         canvasArray,
         height_percent: 12.5
+      });
+      
+      this.waves.forEach(wave => {
+        wave.visualizer?.draw();
       });
     }
   }

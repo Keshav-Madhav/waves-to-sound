@@ -20,30 +20,55 @@ export class WaveVisualizer {
   }
 
   draw() {
-    if (!this.context || !this.canvas) return;
-    
+    if (!this.canvas || !this.context || !this.wave.formulaExecutable) return;
+
+    const ctx = this.context;
     const width = this.canvas.width;
     const height = this.canvas.height;
-    const centerY = height / 2;
-    const samples = width;
-    
-    this.context.clearRect(0, 0, width, height);
-    this.context.beginPath();
-    
-    for (let x = 0; x < samples; x++) {
-      const t = x / samples;
-      const value = this.wave.getValueAtTime(t);
-      const y = centerY - (value * centerY);
-      
-      if (x === 0) {
-        this.context.moveTo(x, y);
+    const padding = 5;
+    const drawableHeight = height - 2 * padding;
+    const midY = height / 2;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // Optional: Draw axis line
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(0, midY);
+    ctx.lineTo(width, midY);
+    ctx.stroke();
+
+    // Draw waveform
+    const freq = this.wave.frequency;
+    const amp = this.wave.amplitude;
+    const formula = this.wave.formulaExecutable;
+    const step = 0.5;
+    const points = Math.floor(width / step);
+
+    // At 20Hz, we want 1 full cycle across width
+    const baseFreq = 20;
+    const cycles = freq / baseFreq;
+    const duration = cycles / freq; // time span to draw
+    const timePerPixel = duration / points;
+
+    ctx.beginPath();
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 1;
+
+    for (let i = 0; i <= points; i++) {
+      const t = i * timePerPixel;
+      const x = i * step;
+      const y = midY - formula(t) * (amp / 100) * (drawableHeight / 2);
+
+      if (i === 0) {
+        ctx.moveTo(x, y);
       } else {
-        this.context.lineTo(x, y);
+        ctx.lineTo(x, y);
       }
     }
-    
-    this.context.strokeStyle = this.color;
-    this.context.lineWidth = 1;
-    this.context.stroke();
+
+    ctx.stroke();
   }
+
 }

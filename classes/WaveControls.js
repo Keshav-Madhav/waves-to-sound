@@ -19,8 +19,8 @@ export class WaveControls {
       <div class="wave-sliders-group">
         <div class="wave-control-group">
           <label>Freq</label>
-          <input type="range" class="wave-slider frequency-slider" min="20" max="1000" value="${this.wave.frequency}" data-wave-id="${this.wave.id}">
-          <input type="number" class="wave-input frequency-input" min="20" max="1000" value="${this.wave.frequency}" data-wave-id="${this.wave.id}">
+          <input type="range" class="wave-slider frequency-slider" min="20" max="4000" value="${this.wave.frequency}" data-wave-id="${this.wave.id}">
+          <input type="number" class="wave-input frequency-input" min="20" max="4000" value="${this.wave.frequency}" data-wave-id="${this.wave.id}">
           <span class="wave-unit">Hz</span>
         </div>
         <div class="wave-control-group">
@@ -61,7 +61,7 @@ export class WaveControls {
     freqInput?.addEventListener('input', e => {
       let value = parseFloat(e.target.value);
       if (isNaN(value)) value = 20;
-      value = Math.max(10, Math.min(200, value));
+      value = Math.max(20, Math.min(10000, value));
       freqSlider.value = value;
       e.target.value = value;
       this.wave.setFrequency(value);

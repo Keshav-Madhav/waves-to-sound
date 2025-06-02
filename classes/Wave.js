@@ -6,8 +6,8 @@ import { WaveFormulas } from './WaveFormulas.js';
 export class Wave {
   constructor(id) {
     this.id = id;
-    this.frequency = 100;
-    this.amplitude = 50;
+    this.frequency = Math.ceil(400 * Math.random()) + 20
+    this.amplitude = 100;
     this.waveType = 'sine';
     this.formulaDisplay = '';
     this.formulaExecutable = null;

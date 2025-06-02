@@ -10,11 +10,11 @@
   <div class="container">
     <div class="header">
       <h1>Wave Sound Generator</h1>
+      <button class="control-button" id="add-wave-btn">Add Wave</button>
     </div>
     
     <div class="controls">
       <div class="control-group">
-        <label>Master</label>
         <button class="control-button" id="play-btn">Play</button>
         <button class="control-button" id="stop-btn">Stop</button>
       </div>
@@ -23,56 +23,12 @@
         <label>Volume</label>
         <input type="range" class="slider" id="master-volume" min="0" max="100" value="50">
       </div>
-      
-      <div class="control-group">
-        <label>Mix</label>
-        <button class="control-button" id="mix-btn">Auto Mix</button>
-        <button class="control-button" id="clear-btn">Clear All</button>
-      </div>
     </div>
     
     <div id="wave-container">
-      <div style="position: relative;">
-        <canvas id="wave-1-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 1</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-2-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 2</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-3-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 3</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-4-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 4</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-5-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 5</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-6-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 6</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-7-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 7</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-8-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 8</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-9-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 9</div>
-      </div>
-      <div style="position: relative;">
-        <canvas id="wave-10-canvas" class="wave-canvas"></canvas>
-        <div class="wave-label">Wave 10</div>
-      </div>
     </div>
   </div>
+
 </body>
+<script src="main.js" type="module"></script>
 </html>

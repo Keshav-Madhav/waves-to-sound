@@ -31,6 +31,11 @@ export class WaveManager {
 
     this.resizeAllWaves();
     console.log(`Added wave ${this.waveCounter}`);
+    
+    // Dispatch event when a wave is added
+    document.dispatchEvent(new CustomEvent('waveAdded', { 
+      detail: { id: this.waveCounter } 
+    }));
   }
 
   removeWave(id) {
@@ -40,6 +45,11 @@ export class WaveManager {
       this.waves.splice(index, 1);
       this.resizeAllWaves();
       console.log(`Removed wave ${id}`);
+      
+      // Dispatch event when a wave is removed
+      document.dispatchEvent(new CustomEvent('waveRemoved', { 
+        detail: { id } 
+      }));
     }
   }
 

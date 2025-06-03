@@ -10,27 +10,12 @@ export class MainWave {
     this.context = this.canvas.getContext('2d');
     this.color = '#4a8fe7';
 
-    this.visibleCycles = 1; // Number of complete cycles to show
-    this.baseFrequency = 20; // Base frequency for visualization (Hz)
+    this.visibleCycles = 1;
+    this.baseFrequency = 20;
     
     this.createMainWaveElement();
     this.setupEventListeners();
     this.resize();
-  }
-
-  createMainWaveElement() {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'main-wave-wrapper';
-    
-    wrapper.innerHTML = `
-      <div class="main-wave-header">Combined Waveform</div>
-      <div class="wave-info">
-        <div id="main-wave-formula" class="wave-formula"></div>
-      </div>
-    `;
-    
-    wrapper.appendChild(this.canvas);
-    this.container.insertBefore(wrapper, this.container.firstChild);
   }
 
   setupEventListeners() {
@@ -46,9 +31,36 @@ export class MainWave {
       this.updateFormulaDisplay();
     });
 
+    // Listen for wave additions
+    document.addEventListener('waveAdded', () => {
+      this.draw();
+      this.updateFormulaDisplay();
+    });
+
+    // Listen for wave removals
+    document.addEventListener('waveRemoved', () => {
+      this.draw();
+      this.updateFormulaDisplay();
+    });
+
     // Listen for window resize
     window.addEventListener('resize', () => this.resize());
     window.addEventListener('load', () => this.resize());
+  }
+
+  createMainWaveElement() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'main-wave-wrapper';
+    
+    wrapper.innerHTML = `
+      <div class="main-wave-header">Combined Waveform</div>
+      <div class="wave-info">
+        <div id="main-wave-formula" class="wave-formula"></div>
+      </div>
+    `;
+    
+    wrapper.appendChild(this.canvas);
+    this.container.insertBefore(wrapper, this.container.firstChild);
   }
 
   resize() {

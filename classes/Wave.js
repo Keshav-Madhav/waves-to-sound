@@ -4,15 +4,16 @@ import { WaveControls } from './WaveControls.js';
 import { WaveFormulas } from './WaveFormulas.js';
 
 export class Wave {
-  constructor(id) {
+  constructor(id, visibleCycles = 10) {
     this.id = id;
-    this.frequency = Math.floor(Math.random() * (4000 - 200 + 1) + 200);
-    this.amplitude = 100;
+    this.frequency = id === 1 ? 20 : 20 //Math.floor(Math.random() * (4000 - 200 + 1) + 200)
+    this.amplitude = id === 1 ? 100 : 0;
     this.waveType = 'sine';
     this.formulaDisplay = '';
     this.formulaExecutable = null;
     this.isActive = true; // New active state flag
-   
+    this.visibleCycles = visibleCycles;
+
     this.visualizer = new WaveVisualizer(this);
     this.audio = new WaveAudio(this); // Placeholder for future audio
     this.controls = new WaveControls(this, (id) => {
@@ -150,6 +151,14 @@ export class Wave {
     return this.formulaExecutable?.(t) || 0;
   }
 
+  setVisibleCycles(cycles) {
+    this.visibleCycles = cycles;
+    this._dispatchPropertyChange();
+    if (this.visualizer) {
+      this.visualizer.draw();
+    }
+  }
+
   getWaveData() {
     return {
       id: this.id,
@@ -157,6 +166,7 @@ export class Wave {
       amplitude: this.amplitude,
       type: this.waveType,
       isActive: this.isActive,
+      visibleCycles: this.visibleCycles,
       formulaDisplay: this.formulaDisplay,
       formulaExecutable: this.formulaExecutable.toString()
     };

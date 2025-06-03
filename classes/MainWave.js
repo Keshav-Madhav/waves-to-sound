@@ -10,7 +10,7 @@ export class MainWave {
     this.context = this.canvas.getContext('2d');
     this.color = '#4a8fe7';
 
-    this.visibleCycles = 1;
+    this.visibleCycles = waveManager.visibleCycles || 10;
     this.baseFrequency = 20;
     
     this.createMainWaveElement();
@@ -104,23 +104,30 @@ export class MainWave {
     ctx.clearRect(0, 0, width, height);
     
     // Draw axis line
-    ctx.strokeStyle = '#ccc';
+    ctx.strokeStyle = '#fff';
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.moveTo(0, midY);
     ctx.lineTo(width, midY);
     ctx.stroke();
     
+    // Add time markers
+    ctx.fillStyle = '#666';
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'center';
+    for (let cycle = 0; cycle <= this.visibleCycles; cycle++) {
+      const xPos = (cycle / this.visibleCycles) * width;
+      ctx.fillText(`${cycle.toFixed(1)}s`, xPos-15, height - 5);
+      ctx.beginPath();
+      ctx.moveTo(xPos, 0);
+      ctx.lineTo(xPos, height);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+    
     // Get all active waves
     const activeWaves = this.waveManager.waves.filter(wave => wave.isActive);
-    
-    if (activeWaves.length === 0) {
-      ctx.fillStyle = '#999';
-      ctx.font = '14px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('No active waves to combine', width / 2, midY);
-      return;
-    }
     
     // Calculate the maximum possible amplitude for scaling
     const maxPossibleAmplitude = activeWaves.reduce((sum, wave) => sum + Math.abs(wave.amplitude), 0);
@@ -179,14 +186,5 @@ export class MainWave {
       width - 10, 
       20
     );
-    
-    // Add time markers
-    ctx.fillStyle = '#666';
-    ctx.font = '10px Arial';
-    ctx.textAlign = 'center';
-    for (let cycle = 0; cycle <= this.visibleCycles; cycle++) {
-      const xPos = (cycle / this.visibleCycles) * width;
-      ctx.fillText(`${cycle.toFixed(1)}s`, xPos, height - 5);
-    }
   }
 }

@@ -31,25 +31,38 @@ export class WaveVisualizer {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Optional: Draw axis line
-    ctx.strokeStyle = '#ccc';
-    ctx.lineWidth = 0.5;
+    // Draw axis line
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, midY);
     ctx.lineTo(width, midY);
     ctx.stroke();
 
+    // Add time markers with vertical lines
+    ctx.fillStyle = '#666';
+    ctx.font = '10px Arial';
+    ctx.textAlign = 'center';
+    for (let cycle = 0; cycle <= this.wave.visibleCycles; cycle++) {
+      const xPos = (cycle / this.wave.visibleCycles) * width;
+      ctx.fillText(`${cycle.toFixed(1)}s`, xPos-15, height - 5);
+      ctx.beginPath();
+      ctx.moveTo(xPos, 0);
+      ctx.lineTo(xPos, height);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
     // Draw waveform
-    const freq = this.wave.frequency;
     const amp = this.wave.amplitude;
     const formula = this.wave.formulaExecutable;
     const step = 0.5;
     const points = Math.floor(width / step);
 
-    // At 20Hz, we want 1 full cycle across width
-    const baseFreq = 20;
-    const cycles = freq / baseFreq;
-    const duration = cycles / freq; // time span to draw
+    // Fixed time scale (shows consistent number of cycles regardless of frequency)
+    const baseFrequency = 20; // Same as MainWave for consistency
+    const duration = this.wave.visibleCycles / baseFrequency;
     const timePerPixel = duration / points;
 
     ctx.beginPath();
@@ -70,5 +83,4 @@ export class WaveVisualizer {
 
     ctx.stroke();
   }
-
 }

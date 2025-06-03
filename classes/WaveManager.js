@@ -7,12 +7,13 @@ export class WaveManager {
     this.waveCounter = 0;
     this.waves = [];
     this.container = document.getElementById(containerId);
+    this.visibleCycles = 3; // Default value
 
     // Initialize main wave
     this.mainWave = new MainWave(this, containerId);
 
-    // Initialize with 6 waves
-    for (let i = 0; i < 6; i++) this.addWave();
+    // Initialize with 2 waves
+    for (let i = 0; i < 2; i++) this.addWave();
 
     // Set up event listeners
     window.addEventListener('load', () => this.resizeAllWaves());
@@ -22,7 +23,7 @@ export class WaveManager {
 
   addWave() {
     this.waveCounter++;
-    const wave = new Wave(this.waveCounter);
+    const wave = new Wave(this.waveCounter, this.visibleCycles);
     this.waves.push(wave);
 
     const waveElement = wave.createElement();
@@ -65,5 +66,15 @@ export class WaveManager {
         wave.visualizer?.draw();
       });
     }
+  }
+
+  // Add this new method to update all waves
+  setVisibleCyclesForAll(cycles) {
+    this.visibleCycles = cycles;
+    this.waves.forEach(wave => {
+      wave.setVisibleCycles(cycles);
+    });
+    this.mainWave.visibleCycles = cycles;
+    this.mainWave.draw();
   }
 }

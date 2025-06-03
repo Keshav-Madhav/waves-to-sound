@@ -67,6 +67,22 @@ export class WaveManager {
       });
     }
   }
+  
+  activeAllWaves() {
+    this.waves.forEach(wave => {
+      wave.isActive = true;
+      wave._updateActiveStatus();
+    });
+    this.mainWave.draw();
+  }
+
+  inactiveAllWaves() {
+    this.waves.forEach(wave => {
+      wave.isActive = false;
+      wave._updateActiveStatus();
+    });
+    this.mainWave.draw();
+  }
 
   // Add this new method to update all waves
   setVisibleCyclesForAll(cycles) {

@@ -4,6 +4,7 @@ let isPlaying = false;
 
 const manager = new WaveManager('wave-container');
 
+// Existing event listeners
 document.getElementById('add-wave-btn').addEventListener('click', () => {
   manager.addWave();
 });
@@ -22,9 +23,34 @@ document.getElementById('stop-btn').addEventListener('click', () => {
   console.log('Stop');
 });
 
+// Updated master volume with display
 document.getElementById('master-volume').addEventListener('input', (e) => {
   const volume = e.target.value;
+  document.getElementById('volume-display').textContent = volume;
   console.log(`Master volume set to ${volume}`);
+});
+
+// New event listeners for enhanced controls
+document.getElementById('active-all-btn').addEventListener('click', () => {
+  manager.activeAllWaves();
+});
+
+document.getElementById('inactive-all-btn').addEventListener('click', () => {
+  manager.inactiveAllWaves();
+});
+
+document.getElementById('visible-cycles').addEventListener('input', (e) => {
+  const cycles = parseInt(e.target.value);
+  document.getElementById('cycles-display').textContent = cycles;
+  manager.setVisibleCyclesForAll(cycles);
+});
+
+// Initialize displays on page load
+window.addEventListener('load', () => {
+  document.getElementById('volume-display').textContent = 
+    document.getElementById('master-volume').value;
+  document.getElementById('cycles-display').textContent = 
+    document.getElementById('visible-cycles').value;
 });
 
 // Global event to remove waves (delegated from Wave)

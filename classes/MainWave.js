@@ -182,7 +182,7 @@ export class MainWave {
     ctx.font = '12px Arial';
     ctx.textAlign = 'right';
     ctx.fillText(
-      `${activeWaves.length} active waves`, 
+      `${activeWaves.length} active wave${activeWaves.length !== 1 ? 's' : ''}`, 
       width - 10, 
       20
     );

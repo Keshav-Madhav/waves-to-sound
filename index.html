@@ -10,25 +10,43 @@
   <div class="container">
     <div class="header">
       <h1>Wave Sound Generator</h1>
-      <button class="control-button" id="add-wave-btn">Add Wave</button>
     </div>
     
     <div class="controls">
-      <div class="control-group">
-        <button class="control-button" id="play-btn">Play</button>
-        <button class="control-button" id="stop-btn">Stop</button>
-      </div>
-      
-      <div class="control-group">
-        <label>Volume</label>
-        <input type="range" class="slider" id="master-volume" min="0" max="100" value="50">
+      <div class="controls-grid">
+        <div class="playback-controls">
+          <div class="control-group">
+            <button class="control-button" id="play-btn">▶ Play</button>
+            <button class="control-button" id="stop-btn">⏹ Stop</button>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <button class="control-button add-wave" id="add-wave-btn">+ Add Wave</button>
+          <button class="control-button" id="active-all-btn">⚡ Active All</button>
+          <button class="control-button danger" id="inactive-all-btn">⚪ Inactive All</button>
+        </div>
+        
+        <div class="global-controls">
+          <div class="control-group">
+            <label>Volume</label>
+            <input type="range" class="slider" id="master-volume" min="0" max="100" value="50">
+            <span class="input-display" id="volume-display">50</span>
+          </div>
+          <div class="control-group">
+            <label>Visible Cycles</label>
+            <input type="range" class="slider" id="visible-cycles" min="1" max="8" value="3">
+            <span class="input-display" id="cycles-display">3</span>
+          </div>
+        </div>
       </div>
     </div>
     
     <div id="wave-container">
+      <!-- Wave components will be added here -->
     </div>
   </div>
 
+  <script src="main.js" type="module"></script>
 </body>
-<script src="main.js" type="module"></script>
 </html>

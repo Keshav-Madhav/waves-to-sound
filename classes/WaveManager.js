@@ -1,11 +1,15 @@
 import { Wave } from './Wave.js';
 import { resizeCanvas } from '../utils/resizeCanvas.js';
+import { MainWave } from './MainWave.js';
 
 export class WaveManager {
   constructor(containerId) {
     this.waveCounter = 0;
     this.waves = [];
     this.container = document.getElementById(containerId);
+
+    // Initialize main wave
+    this.mainWave = new MainWave(this, containerId);
 
     // Initialize with 6 waves
     for (let i = 0; i < 6; i++) this.addWave();

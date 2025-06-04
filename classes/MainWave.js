@@ -12,38 +12,26 @@ export class MainWave {
 
     this.visibleCycles = waveManager.visibleCycles || 10;
     this.baseFrequency = 20;
-    
+    this.padding = 20;
+    this.minScalingFactor = 0.2; // Minimum scaling factor to ensure wave is still visible
+
     this.createMainWaveElement();
     this.setupEventListeners();
     this.resize();
   }
 
+  getMaxDesiredAmplitude() {
+    return (this.canvas.height / 2) - this.padding;
+  }
+
   setupEventListeners() {
-    // Listen for wave toggles
-    document.addEventListener('waveToggled', () => {
-      this.draw();
-      this.updateFormulaDisplay();
+    ['waveToggled', 'wavePropertyChanged', 'waveAdded', 'waveRemoved'].forEach(eventType => {
+      document.addEventListener(eventType, () => {
+        this.draw();
+        this.updateFormulaDisplay();
+      });
     });
 
-    // Listen for wave property changes
-    document.addEventListener('wavePropertyChanged', () => {
-      this.draw();
-      this.updateFormulaDisplay();
-    });
-
-    // Listen for wave additions
-    document.addEventListener('waveAdded', () => {
-      this.draw();
-      this.updateFormulaDisplay();
-    });
-
-    // Listen for wave removals
-    document.addEventListener('waveRemoved', () => {
-      this.draw();
-      this.updateFormulaDisplay();
-    });
-
-    // Listen for window resize
     window.addEventListener('resize', () => this.resize());
     window.addEventListener('load', () => this.resize());
   }
@@ -64,127 +52,125 @@ export class MainWave {
   }
 
   resize() {
-    const width = this.container.clientWidth;
-    const height = 150; // Fixed height for main wave
-    
-    this.canvas.width = width;
-    this.canvas.height = height;
+    this.canvas.width = this.container.clientWidth;
+    this.canvas.height = 150;
     this.draw();
   }
 
   updateFormulaDisplay() {
-    const activeWaves = this.waveManager.waves.filter(wave => wave.isActive);
     const formulaDisplay = document.getElementById('main-wave-formula');
-    
+    const activeWaves = this.waveManager.waves.filter(w => w.isActive);
+
     if (!formulaDisplay) return;
-    
+
     if (activeWaves.length === 0) {
       formulaDisplay.textContent = 'No active waves';
       return;
     }
-    
-    // Create a simplified formula representation
-    const formulas = activeWaves.map(wave => {
-      return `${wave.amplitude}·${wave.waveType}(${wave.frequency.toFixed(0)}t)`;
-    });
-    
-    formulaDisplay.textContent = formulas.join(' + ');
+
+    const formula = activeWaves
+      .map(wave => `${wave.amplitude}·${wave.waveType}(${wave.frequency.toFixed(0)}t)`)
+      .join(' + ');
+    formulaDisplay.textContent = formula;
   }
 
   draw() {
-    if (!this.context) return;
-    
     const ctx = this.context;
+    if (!ctx) return;
+
     const width = this.canvas.width;
     const height = this.canvas.height;
-    const padding = 20; // Increased padding
-    const drawableHeight = height - 2 * padding;
     const midY = height / 2;
-    
+    const drawableHeight = height - 2 * this.padding;
+    const maxDesiredAmplitude = this.getMaxDesiredAmplitude();
+
     ctx.clearRect(0, 0, width, height);
-    
-    // Draw axis line
+
+    // Draw axis
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = 0.5;
     ctx.beginPath();
     ctx.moveTo(0, midY);
     ctx.lineTo(width, midY);
     ctx.stroke();
-    
-    // Add time markers
+
+    // Time markers
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
     ctx.textAlign = 'center';
     for (let cycle = 0; cycle <= this.visibleCycles; cycle++) {
       const xPos = (cycle / this.visibleCycles) * width;
-      ctx.fillText(`${cycle.toFixed(1)}s`, xPos-15, height - 5);
+      ctx.fillText(`${cycle.toFixed(1)}s`, xPos - 15, height - 5);
       ctx.beginPath();
       ctx.moveTo(xPos, 0);
       ctx.lineTo(xPos, height);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = '#444';
       ctx.stroke();
     }
-    
-    // Get all active waves
-    const activeWaves = this.waveManager.waves.filter(wave => wave.isActive);
-    
-    // Calculate the maximum possible amplitude for scaling
-    const maxPossibleAmplitude = activeWaves.reduce((sum, wave) => sum + Math.abs(wave.amplitude), 0);
-    
-    // Draw combined waveform
+
+    const activeWaves = this.waveManager.waves.filter(w => w.isActive);
     const step = 0.5;
     const points = Math.floor(width / step);
-    const duration = this.visibleCycles / this.baseFrequency; // Total time to visualize
+    const duration = this.visibleCycles / this.baseFrequency;
+
+    // Compute combined waveform
+    const values = [];
+    let globalMin = Infinity;
+    let globalMax = -Infinity;
+
+    for (let i = 0; i <= points; i++) {
+      const t = (i / points) * duration;
+      let sum = 0;
+      activeWaves.forEach(w => {
+        sum += w.getValueAtTime(t);
+      });
+      values.push(sum);
+      if (sum < globalMin) globalMin = sum;
+      if (sum > globalMax) globalMax = sum;
+    }
+
+    // Calculate the maximum amplitude of the combined wave
+    const maxAmplitude = Math.max(Math.abs(globalMax), Math.abs(globalMin));
     
+    // Dynamic scaling calculation
+    let scalingFactor;
+    if (maxAmplitude === 0) {
+      scalingFactor = maxDesiredAmplitude; // Default when no amplitude
+    } else {
+      // Calculate scaling to fit the wave in the drawable area
+      const requiredScaling = (drawableHeight / 2) / maxAmplitude;
+      // Use the smaller of desired scaling or required scaling, but not less than minScalingFactor
+      scalingFactor = Math.max(
+        this.minScalingFactor,
+        Math.min(maxDesiredAmplitude, requiredScaling)
+      );
+    }
+
+    // Draw combined waveform
     ctx.beginPath();
     ctx.strokeStyle = this.color;
     ctx.lineWidth = 1;
-    
-    // Find the maximum actual value for auto-scaling
-    let maxActualValue = 0;
-    const values = [];
-    
-    // First pass: calculate all values and find maximum
-    for (let i = 0; i <= points; i++) {
-      const t = (i / points) * duration;
-      let combinedValue = 0;
-      
-      activeWaves.forEach(wave => {
-        combinedValue += wave.getValueAtTime(t);
-      });
-      
-      values.push(combinedValue);
-      maxActualValue = Math.max(maxActualValue, Math.abs(combinedValue));
-    }
-    
-    // Adjust scaling based on actual values if they're smaller than max possible
-    const actualScalingFactor = maxActualValue > 0
-      ? (drawableHeight / 2) / maxActualValue
-      : 1;
-    
-    // Second pass: draw the waveform
+
     for (let i = 0; i <= points; i++) {
       const x = i * step;
-      const y = midY - values[i] * actualScalingFactor;
-      
-      if (i === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
-      }
+      let y = midY - values[i] * scalingFactor;
+
+      // Clamp to visible range (just in case)
+      if (y < this.padding) y = this.padding;
+      if (y > height - this.padding) y = height - this.padding;
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
     }
-    
+
     ctx.stroke();
-    
-    // Add info about the active waves
+
+    // Display wave count
     ctx.fillStyle = this.color;
     ctx.font = '12px Arial';
     ctx.textAlign = 'right';
-    ctx.fillText(
-      `${activeWaves.length} active wave${activeWaves.length !== 1 ? 's' : ''}`, 
-      width - 10, 
-      20
-    );
+    ctx.fillText(`${activeWaves.length} active wave${activeWaves.length !== 1 ? 's' : ''}`, width - 10, 20);
+
+    ctx.fillText(`Scale: ${scalingFactor.toFixed(1)}px/unit`, width - 10, 35);
   }
 }

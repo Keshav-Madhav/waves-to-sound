@@ -6,8 +6,9 @@ import { WaveFormulas } from './WaveFormulas.js';
 export class Wave {
   constructor(id, visibleCycles = 10) {
     this.id = id;
-    this.frequency = id === 1 ? 20 : 20 //Math.floor(Math.random() * (4000 - 200 + 1) + 200)
-    this.amplitude = id === 1 ? 100 : 0;
+    this.frequency = id === 1 ? 20 : Math.floor(Math.random() * (4000 - 200 + 1) + 200)
+    this.amplitude = id === 1 ? 100 : 100;
+    this.phaseShift = 0;
     this.waveType = 'sine';
     this.formulaDisplay = '';
     this.formulaExecutable = null;
@@ -101,7 +102,8 @@ export class Wave {
     const { formulaExecutable, formulaDisplay } = WaveFormulas.generate(
       this.waveType,
       this.amplitude,
-      this.frequency
+      this.frequency,
+      this.phaseShift
     );
    
     this.formulaExecutable = formulaExecutable;
@@ -128,6 +130,12 @@ export class Wave {
 
   setAmplitude(value) {
     this.amplitude = value;
+    this._updateFormulas();
+    this._dispatchPropertyChange();
+  }
+
+  setPhaseShift(value) {
+    this.phaseShift = value;
     this._updateFormulas();
     this._dispatchPropertyChange();
   }
@@ -164,6 +172,7 @@ export class Wave {
       id: this.id,
       frequency: this.frequency,
       amplitude: this.amplitude,
+      phaseShift: this.phaseShift,
       type: this.waveType,
       isActive: this.isActive,
       visibleCycles: this.visibleCycles,

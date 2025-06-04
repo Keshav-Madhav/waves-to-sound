@@ -13,7 +13,7 @@ export class WaveManager {
     this.mainWave = new MainWave(this, containerId);
 
     // Initialize with 2 waves
-    for (let i = 0; i < 2; i++) this.addWave();
+    for (let i = 0; i < 20; i++) this.addWave();
 
     // Set up event listeners
     window.addEventListener('load', () => this.resizeAllWaves());

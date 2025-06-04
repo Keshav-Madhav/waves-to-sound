@@ -29,6 +29,12 @@ export class WaveControls {
           <input type="number" class="wave-input amplitude-input" min="0" max="100" value="${this.wave.amplitude}" data-wave-id="${this.wave.id}">
           <span class="wave-unit">%</span>
         </div>
+        <div class="wave-control-group">
+          <label>Phase</label>
+          <input type="range" class="wave-slider phase-slider" min="0" max="628" value="${Math.round(this.wave.phaseShift * 100)}" data-wave-id="${this.wave.id}">
+          <input type="number" class="wave-input phase-input" min="0" max="628" value="${Math.round(this.wave.phaseShift * 100)}" data-wave-id="${this.wave.id}">
+          <span class="wave-unit">rad×100</span>
+        </div>
       </div>
       <div class="wave-type-group">
         <label>Type</label>
@@ -49,6 +55,8 @@ export class WaveControls {
     const freqInput = this.element.querySelector('.frequency-input');
     const ampSlider = this.element.querySelector('.amplitude-slider');
     const ampInput = this.element.querySelector('.amplitude-input');
+    const phaseSlider = this.element.querySelector('.phase-slider');
+    const phaseInput = this.element.querySelector('.phase-input');
     const typeSelect = this.element.querySelector('.type-select');
     const removeBtn = this.element.querySelector('.remove-wave-btn');
 
@@ -80,6 +88,21 @@ export class WaveControls {
       ampSlider.value = value;
       e.target.value = value;
       this.wave.setAmplitude(value);
+    });
+
+    phaseSlider?.addEventListener('input', e => {
+      const value = parseFloat(e.target.value) / 100;
+      phaseInput.value = e.target.value;
+      this.wave.setPhaseShift(value);
+    });
+
+    phaseInput?.addEventListener('input', e => {
+      let value = parseFloat(e.target.value);
+      if (isNaN(value)) value = 0;
+      value = Math.max(0, Math.min(628, value));
+      phaseSlider.value = value;
+      e.target.value = value;
+      this.wave.setPhaseShift(value / 100);
     });
 
     typeSelect?.addEventListener('change', e => {

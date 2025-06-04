@@ -6,7 +6,7 @@ import { WaveFormulas } from './WaveFormulas.js';
 export class Wave {
   constructor(id, visibleCycles = 10) {
     this.id = id;
-    this.frequency = id === 1 ? 20 : Math.floor(Math.random() * (4000 - 200 + 1) + 200)
+    this.frequency = id === 1 ? 432 : Math.floor(Math.random() * (4000 - 200 + 1) + 200)
     this.amplitude = id === 1 ? 100 : 100;
     this.phaseShift = 0;
     this.waveType = 'sine';
@@ -65,7 +65,16 @@ export class Wave {
     this.isActive = !this.isActive;
     this._updateActiveStatus();
     
-    // Dispatch custom event for external listeners
+    if (!this.manager) return;
+    
+    if (this.isActive) {
+      if (this.manager.isPlaying) {
+        this.audio.play();
+      }
+    } else {
+      this.audio.stop();
+    }
+    
     document.dispatchEvent(new CustomEvent('waveToggled', { 
       detail: { 
         id: this.id, 
@@ -77,6 +86,13 @@ export class Wave {
   setActive(active) {
     this.isActive = active;
     this._updateActiveStatus();
+    
+    // Handle audio based on global play state
+    if (this.isActive && this.manager?.isPlaying) {
+      this.audio.play();
+    } else {
+      this.audio.stop();
+    }
   }
 
   _updateActiveStatus() {
@@ -182,6 +198,8 @@ export class Wave {
   }
 
   destroy() {
+    this.audio.stop();
+    this.audio.destroy();
     const el = document.querySelector(`.wave-wrapper[data-wave-id="${this.id}"]`);
     el?.remove();
   }

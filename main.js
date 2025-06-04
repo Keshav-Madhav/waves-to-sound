@@ -10,17 +10,15 @@ document.getElementById('add-wave-btn').addEventListener('click', () => {
 });
 
 document.getElementById('play-btn').addEventListener('click', () => {
-  isPlaying = true;
+  manager.play();
   document.getElementById('play-btn').classList.add('active');
   document.getElementById('stop-btn').classList.remove('active');
-  console.log('Play');
 });
 
 document.getElementById('stop-btn').addEventListener('click', () => {
-  isPlaying = false;
+  manager.stop();
   document.getElementById('play-btn').classList.remove('active');
   document.getElementById('stop-btn').classList.add('active');
-  console.log('Stop');
 });
 
 // Updated master volume with display

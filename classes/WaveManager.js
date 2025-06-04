@@ -8,17 +8,75 @@ export class WaveManager {
     this.waves = [];
     this.container = document.getElementById(containerId);
     this.visibleCycles = 3; // Default value
+    this.isPlaying = false;
 
     // Initialize main wave
     this.mainWave = new MainWave(this, containerId);
 
     // Initialize with 2 waves
-    for (let i = 0; i < 20; i++) this.addWave();
+    for (let i = 0; i < 1; i++) this.addWave();
 
     // Set up event listeners
     window.addEventListener('load', () => this.resizeAllWaves());
     window.addEventListener('resize', () => this.resizeAllWaves());
     document.addEventListener('removeWave', (e) => this.removeWave(e.detail.id));
+  }
+
+  resizeAllWaves() {
+    const canvasArray = this.waves.map(w => w.visualizer?.canvas).filter(Boolean);
+    if (canvasArray.length > 0) {
+      resizeCanvas({
+        canvasArray,
+        height_percent: 12.5
+      });
+      
+      this.waves.forEach(wave => {
+        wave.visualizer?.draw();
+      });
+    }
+  }
+  
+  play() {
+    if (this.isPlaying) return; // Don't play if already playing
+    
+    this.isPlaying = true;
+    this.waves.forEach(wave => {
+      if (wave.isActive) {
+        wave.audio.play();
+      }
+    });
+    this.mainWave.draw();
+  }
+
+  stop() {
+    if (!this.isPlaying) return; // Don't stop if already stopped
+    
+    this.isPlaying = false;
+    this.waves.forEach(wave => {
+      wave.audio.stop();
+    });
+    this.mainWave.draw();
+  }
+
+  // Update the activeAllWaves and inactiveAllWaves methods:
+  activeAllWaves() {
+    this.waves.forEach(wave => {
+      wave.isActive = true;
+      wave._updateActiveStatus();
+      if (this.isPlaying) {
+        wave.audio.play();
+      }
+    });
+    this.mainWave.draw();
+  }
+
+  inactiveAllWaves() {
+    this.waves.forEach(wave => {
+      wave.isActive = false;
+      wave._updateActiveStatus();
+      wave.audio.stop();
+    });
+    this.mainWave.draw();
   }
 
   addWave() {
@@ -30,10 +88,13 @@ export class WaveManager {
     this.container.appendChild(waveElement);
     wave.initialize();
 
+    if (this.isPlaying && wave.isActive) {
+      wave.audio.play();
+    }
+
     this.resizeAllWaves();
     console.log(`Added wave ${this.waveCounter}`);
     
-    // Dispatch event when a wave is added
     document.dispatchEvent(new CustomEvent('waveAdded', { 
       detail: { id: this.waveCounter } 
     }));
@@ -52,36 +113,6 @@ export class WaveManager {
         detail: { id } 
       }));
     }
-  }
-
-  resizeAllWaves() {
-    const canvasArray = this.waves.map(w => w.visualizer?.canvas).filter(Boolean);
-    if (canvasArray.length > 0) {
-      resizeCanvas({
-        canvasArray,
-        height_percent: 12.5
-      });
-      
-      this.waves.forEach(wave => {
-        wave.visualizer?.draw();
-      });
-    }
-  }
-  
-  activeAllWaves() {
-    this.waves.forEach(wave => {
-      wave.isActive = true;
-      wave._updateActiveStatus();
-    });
-    this.mainWave.draw();
-  }
-
-  inactiveAllWaves() {
-    this.waves.forEach(wave => {
-      wave.isActive = false;
-      wave._updateActiveStatus();
-    });
-    this.mainWave.draw();
   }
 
   // Add this new method to update all waves

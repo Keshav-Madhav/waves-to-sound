@@ -4,14 +4,14 @@ import { WaveControls } from './WaveControls.js';
 import { WaveFormulas } from './WaveFormulas.js';
 
 export class Wave {
-  constructor(id, visibleCycles = 10, manager = null) {
+  constructor(id, visibleCycles = 10, manager = null, formulaExecutable = null, formulaDisplay = '') {
     this.id = id;
     this.frequency = id === 1 ? 432 : Math.floor(Math.random() * (4000 - 200 + 1) + 200)
     this.amplitude = id === 1 ? 100 : 100;
     this.phaseShift = 0;
     this.waveType = 'sine';
-    this.formulaDisplay = '';
-    this.formulaExecutable = null;
+    this.formulaDisplay = formulaDisplay;
+    this.formulaExecutable = formulaExecutable;
     this.isActive = true;
     this.visibleCycles = visibleCycles;
     this.baseFrequency = 10;

@@ -18,7 +18,7 @@ export class WaveManager {
     this.mainWave = new MainWave(this, containerId);
 
     // Initialize with 1 wave
-    for (let i = 0; i < 1; i++) this.addWave();
+    for (let i = 0; i < 15; i++) this.addWave();
 
     // Set up event listeners
     window.addEventListener('load', () => this.resizeAllWaves());
@@ -156,6 +156,16 @@ export class WaveManager {
         detail: { id } 
       }));
     }
+  }
+
+  removeAllWaves() {
+    this.waves.forEach(wave => wave.destroy());
+    this.waves = [];
+    this.waveCounter = 0;
+    this.resizeAllWaves();
+    console.log('Removed all waves');
+
+    document.dispatchEvent(new CustomEvent('allWavesRemoved'));
   }
 
   setVisibleCyclesForAll(cycles) {

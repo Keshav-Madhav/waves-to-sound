@@ -12,12 +12,13 @@ export class Wave {
     this.waveType = 'sine';
     this.formulaDisplay = '';
     this.formulaExecutable = null;
-    this.isActive = true; // New active state flag
+    this.isActive = true;
     this.visibleCycles = visibleCycles;
+    this.baseFrequency = 10;
     this.manager = manager;
 
     this.visualizer = new WaveVisualizer(this);
-    this.audio = new WaveAudio(this); // Placeholder for future audio
+    this.audio = new WaveAudio(this);
     this.controls = new WaveControls(this, (id) => {
       document.dispatchEvent(new CustomEvent('removeWave', { detail: { id } }));
     });
@@ -183,6 +184,15 @@ export class Wave {
     this.visibleCycles = cycles;
     this._dispatchPropertyChange();
     if (this.visualizer) {
+      this.visualizer.draw();
+    }
+  }
+
+  setBaseFrequency(baseFrequency) {
+    this.baseFrequency = baseFrequency;
+    this._dispatchPropertyChange();
+    if (this.visualizer) {
+      this.visualizer.baseFrequency = baseFrequency;
       this.visualizer.draw();
     }
   }

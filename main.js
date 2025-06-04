@@ -1,7 +1,5 @@
 import { WaveManager } from "./classes/WaveManager.js";
 
-let isPlaying = false;
-
 const manager = new WaveManager('wave-container');
 
 // Existing event listeners
@@ -43,12 +41,20 @@ document.getElementById('visible-cycles').addEventListener('input', (e) => {
   manager.setVisibleCyclesForAll(cycles);
 });
 
+document.getElementById('base-freq').addEventListener('input', (e) => {
+  const base_freq = parseInt(e.target.value);
+  document.getElementById('base-freq-display').textContent = base_freq;
+  manager.setBaseFrequency(base_freq);
+});
+
 // Initialize displays on page load
 window.addEventListener('load', () => {
   document.getElementById('volume-display').textContent = 
     document.getElementById('master-volume').value;
   document.getElementById('cycles-display').textContent = 
     document.getElementById('visible-cycles').value;
+  document.getElementById('base-freq-display').textContent =
+    document.getElementById('base-freq').value;
 });
 
 // Global event to remove waves (delegated from Wave)

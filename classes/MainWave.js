@@ -10,8 +10,8 @@ export class MainWave {
     this.context = this.canvas.getContext('2d');
     this.color = '#4a8fe7';
 
-    this.visibleCycles = waveManager.visibleCycles || 10;
-    this.baseFrequency = 20;
+    this.visibleCycles = waveManager.visibleCycles || 5;
+    this.baseFrequency = waveManager.baseFrequency || 10;
     this.padding = 20;
     this.minScalingFactor = 0.2; // Minimum scaling factor to ensure wave is still visible
 
@@ -88,23 +88,41 @@ export class MainWave {
 
     // Draw axis
     ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(0, midY);
     ctx.lineTo(width, midY);
     ctx.stroke();
 
-    // Time markers
+    // Calculate time per cycle (in seconds)
+    const timePerCycle = 1 / this.baseFrequency;
+    const totalTime = this.visibleCycles * timePerCycle;
+
+  // Add time markers at each cycle position (showing actual time)
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
     ctx.textAlign = 'center';
+    
     for (let cycle = 0; cycle <= this.visibleCycles; cycle++) {
+      const time = cycle * timePerCycle;
       const xPos = (cycle / this.visibleCycles) * width;
-      ctx.fillText(`${cycle.toFixed(1)}s`, xPos - 15, height - 5);
+      
+      // Format time display (show decimal places only if needed)
+      let timeText;
+      if (timePerCycle % 1 === 0) {
+        timeText = `${time.toFixed(0)}s`;
+      } else if (timePerCycle >= 0.1) {
+        timeText = `${time.toFixed(1)}s`;
+      } else {
+        timeText = `${time.toFixed(2)}s`;
+      }
+
+      ctx.fillText(timeText, xPos-15, height - 1);
       ctx.beginPath();
       ctx.moveTo(xPos, 0);
       ctx.lineTo(xPos, height);
-      ctx.strokeStyle = '#444';
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.5;
       ctx.stroke();
     }
 

@@ -30,24 +30,24 @@ export class WaveAudio {
     this.gainNode.connect(this.audioContext.destination);
   }
 
-  play() {
+  play(startTime = 0) {
     if (!this.wave.isActive || this.isPlaying) return;
     
-    // If audio context is suspended, resume it
+    if (!this.audioContext) this._initializeAudioContext();
     if (this.audioContext.state === 'suspended') {
       this.audioContext.resume();
     }
     
     this.isPlaying = true;
-    
-    // Stop any existing playback
     this._cleanUpNodes();
     this._createNodes();
     
+    const adjustedStartTime = startTime || this.audioContext.currentTime;
+    
     if (['sine', 'square', 'triangle', 'sawtooth'].includes(this.wave.waveType)) {
-      this._playWithNativeOscillator();
+      this._playWithNativeOscillator(adjustedStartTime);
     } else {
-      this._playWithScriptProcessor();
+      this._playWithScriptProcessor(adjustedStartTime);
     }
   }
 
@@ -76,16 +76,22 @@ export class WaveAudio {
   }
 
   // Use native Web Audio oscillator for standard wave types
-  _playWithNativeOscillator() {
+  _playWithNativeOscillator(startTime) {
     this.oscillator = this.audioContext.createOscillator();
     this.oscillator.type = this.wave.waveType;
     this.oscillator.frequency.value = this.wave.frequency;
     this.oscillator.connect(this.gainNode);
-    this.oscillator.start();
+    
+    // Set initial phase for synchronization
+    const initialPhase = (this.wave.phaseShift * Math.PI) / 180;
+    this.oscillator.start(startTime);
+    
+    // For WebAudio's native oscillators, we can't set phase directly after start,
+    // so we set it via detune which gives us phase control
+    this.oscillator.detune.value = (initialPhase * 180 / Math.PI) * 1200 / 360;
   }
 
-  // Use script processor for custom wave forms or when we need exact formula matching
-  _playWithScriptProcessor() {
+  _playWithScriptProcessor(startTime) {
     const sampleRate = this.audioContext.sampleRate;
     const bufferSize = 4096;
     
@@ -98,20 +104,20 @@ export class WaveAudio {
         
         const output = e.outputBuffer.getChannelData(0);
         const amplitude = this.wave.amplitude / 100;
+        const currentTime = this.audioContext.currentTime;
+        const elapsed = currentTime - startTime;
         
         for (let i = 0; i < bufferSize; i++) {
-          const time = (phase + i) / sampleRate;
+          const time = elapsed + (i / sampleRate);
           output[i] = this.wave.getValueAtTime(time) * amplitude;
         }
-        
-        phase += bufferSize;
       };
       
       scriptNode.connect(this.gainNode);
       this.scriptNode = scriptNode;
     } catch (e) {
       console.error('Error creating script processor:', e);
-      this._playWithNativeOscillator(); // Fallback
+      this._playWithNativeOscillator(startTime); // Fallback
     }
   }
 

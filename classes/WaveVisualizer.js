@@ -19,13 +19,13 @@ export class WaveVisualizer {
     this.draw();
   }
 
-  draw() {
+  draw(elapsedTime = 0) {
     if (!this.canvas || !this.context || !this.wave.formulaExecutable) return;
 
     const ctx = this.context;
     const width = this.canvas.width;
     const height = this.canvas.height;
-    const padding = 5;
+    const padding = 12;
     const drawableHeight = height - 2 * padding;
     const midY = height / 2;
 
@@ -39,13 +39,30 @@ export class WaveVisualizer {
     ctx.lineTo(width, midY);
     ctx.stroke();
 
-    // Add time markers with vertical lines
+    // Calculate time per cycle (in seconds)
+    const timePerCycle = 1 / this.wave.baseFrequency;
+    const totalTime = this.wave.visibleCycles * timePerCycle;
+
+    // Add time markers at each cycle position (showing actual time)
     ctx.fillStyle = '#666';
     ctx.font = '10px Arial';
     ctx.textAlign = 'center';
+    
     for (let cycle = 0; cycle <= this.wave.visibleCycles; cycle++) {
+      const time = cycle * timePerCycle;
       const xPos = (cycle / this.wave.visibleCycles) * width;
-      ctx.fillText(`${cycle.toFixed(1)}s`, xPos-15, height - 5);
+      
+      // Format time display (show decimal places only if needed)
+      let timeText;
+      if (timePerCycle % 1 === 0) {
+        timeText = `${time.toFixed(0)}s`;
+      } else if (timePerCycle >= 0.1) {
+        timeText = `${time.toFixed(1)}s`;
+      } else {
+        timeText = `${time.toFixed(2)}s`;
+      }
+
+      ctx.fillText(timeText, xPos-15, height - 1);
       ctx.beginPath();
       ctx.moveTo(xPos, 0);
       ctx.lineTo(xPos, height);
@@ -59,10 +76,7 @@ export class WaveVisualizer {
     const formula = this.wave.formulaExecutable;
     const step = 0.5;
     const points = Math.floor(width / step);
-
-    // Fixed time scale (shows consistent number of cycles regardless of frequency)
-    const baseFrequency = 20; // Same as MainWave for consistency
-    const duration = this.wave.visibleCycles / baseFrequency;
+    const duration = totalTime;
     const timePerPixel = duration / points;
 
     ctx.beginPath();
@@ -82,5 +96,18 @@ export class WaveVisualizer {
     }
 
     ctx.stroke();
+
+    // Draw playback cursor
+    if (elapsedTime !== undefined && this.wave.isActive) {
+      const cursorX = (elapsedTime * this.wave.baseFrequency % this.wave.visibleCycles) / 
+                      this.wave.visibleCycles * width;
+      
+      ctx.beginPath();
+      ctx.moveTo(cursorX, 0);
+      ctx.lineTo(cursorX, height);
+      ctx.strokeStyle = '#ff8';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
   }
 }

@@ -7,13 +7,17 @@ export class WaveManager {
     this.waveCounter = 0;
     this.waves = [];
     this.container = document.getElementById(containerId);
-    this.visibleCycles = 3; // Default value
+    this.visibleCycles = 5;
+    this.baseFrequency = 10;
     this.isPlaying = false;
+    this.startTime = 0;
+    this.lastDrawTime = 0;
+    this.animationFrameId = null;
 
     // Initialize main wave
     this.mainWave = new MainWave(this, containerId);
 
-    // Initialize with 2 waves
+    // Initialize with 1 wave
     for (let i = 0; i < 1; i++) this.addWave();
 
     // Set up event listeners
@@ -37,25 +41,64 @@ export class WaveManager {
   }
   
   play() {
-    if (this.isPlaying) return; // Don't play if already playing
+    if (this.isPlaying) return;
     
     this.isPlaying = true;
+    this.startTime = this.waves[0]?.audio.audioContext?.currentTime || 
+                     (new AudioContext()).currentTime;
+    
+    // Start all waves at the same time
     this.waves.forEach(wave => {
       if (wave.isActive) {
-        wave.audio.play();
+        wave.audio.play(this.startTime);
       }
     });
+    
     this.mainWave.draw();
+    this.startVisualizationLoop();
   }
 
   stop() {
-    if (!this.isPlaying) return; // Don't stop if already stopped
+    if (!this.isPlaying) return;
     
     this.isPlaying = false;
     this.waves.forEach(wave => {
       wave.audio.stop();
     });
+    
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    
     this.mainWave.draw();
+  }
+
+  startVisualizationLoop() {
+    if (!this.isPlaying) return;
+    
+    const draw = () => {
+      if (!this.isPlaying) return;
+      
+      const currentTime = this.waves[0]?.audio.audioContext?.currentTime || 
+                         (new AudioContext()).currentTime;
+      const elapsed = currentTime - this.startTime;
+      
+      // Update all visualizers
+      this.waves.forEach(wave => {
+        if (wave.visualizer) {
+          wave.visualizer.draw(elapsed);
+        }
+      });
+      
+      if (this.mainWave) {
+        this.mainWave.draw(elapsed);
+      }
+      
+      this.animationFrameId = requestAnimationFrame(draw);
+    };
+    
+    this.animationFrameId = requestAnimationFrame(draw);
   }
 
   // Update the activeAllWaves and inactiveAllWaves methods:
@@ -115,13 +158,21 @@ export class WaveManager {
     }
   }
 
-  // Add this new method to update all waves
   setVisibleCyclesForAll(cycles) {
     this.visibleCycles = cycles;
     this.waves.forEach(wave => {
       wave.setVisibleCycles(cycles);
     });
     this.mainWave.visibleCycles = cycles;
+    this.mainWave.draw();
+  }
+
+  setBaseFrequency(baseFrequency) {
+    this.baseFrequency = baseFrequency;
+    this.waves.forEach(wave => {
+      wave.setBaseFrequency(baseFrequency);
+    });
+    this.mainWave.baseFrequency = baseFrequency;
     this.mainWave.draw();
   }
 }

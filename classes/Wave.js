@@ -4,7 +4,7 @@ import { WaveControls } from './WaveControls.js';
 import { WaveFormulas } from './WaveFormulas.js';
 
 export class Wave {
-  constructor(id, visibleCycles = 10) {
+  constructor(id, visibleCycles = 10, manager = null) {
     this.id = id;
     this.frequency = id === 1 ? 432 : Math.floor(Math.random() * (4000 - 200 + 1) + 200)
     this.amplitude = id === 1 ? 100 : 100;
@@ -14,6 +14,7 @@ export class Wave {
     this.formulaExecutable = null;
     this.isActive = true; // New active state flag
     this.visibleCycles = visibleCycles;
+    this.manager = manager;
 
     this.visualizer = new WaveVisualizer(this);
     this.audio = new WaveAudio(this); // Placeholder for future audio
@@ -62,26 +63,25 @@ export class Wave {
   }
 
   toggleActive() {
-    this.isActive = !this.isActive;
-    this._updateActiveStatus();
-    
-    if (!this.manager) return;
-    
-    if (this.isActive) {
-      if (this.manager.isPlaying) {
-        this.audio.play();
-      }
-    } else {
-      this.audio.stop();
+  this.isActive = !this.isActive;
+  this._updateActiveStatus();
+  
+  // Handle audio immediately
+  if (this.isActive) {
+    if (this.manager?.isPlaying) {
+      this.audio.play();
     }
-    
-    document.dispatchEvent(new CustomEvent('waveToggled', { 
-      detail: { 
-        id: this.id, 
-        isActive: this.isActive 
-      } 
-    }));
+  } else {
+    this.audio.stop();
   }
+  
+  document.dispatchEvent(new CustomEvent('waveToggled', { 
+    detail: { 
+      id: this.id, 
+      isActive: this.isActive 
+    } 
+  }));
+}
 
   setActive(active) {
     this.isActive = active;
@@ -141,24 +141,28 @@ export class Wave {
   setFrequency(value) {
     this.frequency = value;
     this._updateFormulas();
+    this.audio.update(); // Add this line
     this._dispatchPropertyChange();
   }
 
   setAmplitude(value) {
     this.amplitude = value;
     this._updateFormulas();
+    this.audio.update(); // Add this line
     this._dispatchPropertyChange();
   }
 
   setPhaseShift(value) {
     this.phaseShift = value;
     this._updateFormulas();
+    this.audio.update(); // Add this line
     this._dispatchPropertyChange();
   }
 
   setWaveType(type) {
     this.waveType = type;
     this._updateFormulas();
+    this.audio.update(); // Add this line
     this._dispatchPropertyChange();
   }
 

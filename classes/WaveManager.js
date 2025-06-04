@@ -81,7 +81,7 @@ export class WaveManager {
 
   addWave() {
     this.waveCounter++;
-    const wave = new Wave(this.waveCounter, this.visibleCycles);
+    const wave = new Wave(this.waveCounter, this.visibleCycles, this);
     this.waves.push(wave);
 
     const waveElement = wave.createElement();

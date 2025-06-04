@@ -115,19 +115,26 @@ export class WaveAudio {
     }
   }
 
-  // Update audio parameters when wave properties change
   update() {
     if (!this.audioContext) return;
     
     // Update gain (volume)
     this.gainNode.gain.value = this.wave.amplitude / 100;
     
-    // Update oscillator frequency if using native oscillator
     if (this.oscillator) {
-      this.oscillator.frequency.value = this.wave.frequency;
+      // If wave type changed to a custom type, switch to script processor
+      if (!['sine', 'square', 'triangle', 'sawtooth'].includes(this.wave.waveType)) {
+        this.stop();
+        this.play();
+        return;
+      }
       
-      // If wave type changed, we need to recreate the oscillator
-      if (this.oscillator.type !== this.wave.waveType) {
+      // Update oscillator frequency and type
+      this.oscillator.frequency.value = this.wave.frequency;
+      this.oscillator.type = this.wave.waveType;
+    } else if (this.scriptNode) {
+      // If wave type changed to a standard type, switch to native oscillator
+      if (['sine', 'square', 'triangle', 'sawtooth'].includes(this.wave.waveType)) {
         this.stop();
         this.play();
       }
